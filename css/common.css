@@ -46,6 +46,14 @@ main > * {
     margin: 16px 0;
 }
 
+#app-icon {
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 17%;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.9);
+}
+
 h1 {
     text-align: center;
 }
@@ -95,14 +103,6 @@ header {
     flex-direction: row;
     column-gap: 1.5vh;
     align-items: center;
-}
-
-img {
-    height: 100%;
-    aspect-ratio: 1/1;
-    object-fit: cover;
-    border-radius: 17%;
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.9);
 }
 
 #iosText {

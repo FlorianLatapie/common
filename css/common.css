@@ -33,6 +33,11 @@
     }
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 main {
     margin: 0 2vw;
     display: flex;
@@ -109,4 +114,8 @@ header {
     display: none;
     position: absolute;
     bottom: 50px;
+}
+
+.hidden {
+    display: none !important;
 }

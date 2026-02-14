@@ -121,63 +121,6 @@ class CommonStorage {
     invalidateCache() {
         this._cache = null;
     }
-
-    // ─── Méthodes statiques de migration ───
-
-    /**
-     * Renommer une clé localStorage (migration simple).
-     * Ne fait rien si newKey existe déjà.
-     * @param {string} oldKey
-     * @param {string} newKey
-     */
-    static migrateRenameKey(oldKey, newKey) {
-        if (oldKey === newKey) return;
-        const raw = localStorage.getItem(oldKey);
-        if (raw !== null && localStorage.getItem(newKey) === null) {
-            localStorage.setItem(newKey, raw);
-            localStorage.removeItem(oldKey);
-            console.log(`[CommonStorage] Clé "${oldKey}" migrée vers "${newKey}"`);
-        } else if (raw !== null) {
-            localStorage.removeItem(oldKey);
-        }
-    }
-
-    /**
-     * Migrer une ancienne clé standalone vers une sous-clé d'un CommonStorage.
-     * Ne fait rien si la sous-clé existe déjà.
-     * @param {CommonStorage} storage - Instance cible
-     * @param {string} oldKey - Ancienne clé localStorage
-     * @param {string} subKey - Sous-clé dans l'objet racine
-     */
-    static migrateLegacyKey(storage, oldKey, subKey) {
-        const raw = localStorage.getItem(oldKey);
-        if (raw === null) return;
-        if (storage.get(subKey) === null) {
-            try {
-                storage.set(subKey, JSON.parse(raw));
-            } catch {
-                storage.set(subKey, raw);
-            }
-            console.log(`[CommonStorage] Clé legacy "${oldKey}" migrée vers "${storage.appKey}.${subKey}"`);
-        }
-        localStorage.removeItem(oldKey);
-    }
-
-    /**
-     * Lire et supprimer une ancienne clé localStorage (pour migration custom).
-     * @param {string} key
-     * @returns {*} Valeur parsée ou null
-     */
-    static readAndRemoveLegacyKey(key) {
-        const raw = localStorage.getItem(key);
-        if (raw === null) return null;
-        localStorage.removeItem(key);
-        try {
-            return JSON.parse(raw);
-        } catch {
-            return raw;
-        }
-    }
 }
 
 window.CommonStorage = CommonStorage;

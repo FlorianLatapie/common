@@ -5,12 +5,12 @@
  * Toutes les données de l'app sont stockées comme un objet JSON sous cette clé.
  *
  * Usage :
- *   const storage = new CommonStorage('velib');
- *   storage.set('stations', [...]);
- *   storage.get('stations');
- *   storage.getAll();        // { stations: [...] }
- *   storage.setAll({ stations: [...] });
- *   storage.clear();
+ *   const storage = new CommonStorage('velib');  // 'velib' est chargé dans l'ojbet racine
+ *   storage.set('stations', [...]);              // stocke les stations dans la clé 'stations' de l'objet racine dans 'velib'
+ *   storage.get('stations');                     // récupère les stations depuis la clé 'stations' de l'objet racine dans 'velib'
+ *   storage.getAll();                            // récupère l'objet racine complet { stations: [...] }
+ *   storage.setAll({ stations: [...] });         // remplace l'objet racine complet par { stations: [...] }
+ *   storage.clear();                             // supprime toutes les données de cette app
  */
 class CommonStorage {
     /**
@@ -21,28 +21,25 @@ class CommonStorage {
             throw new Error('CommonStorage: appKey est requis');
         }
         this.appKey = appKey;
-        this._cache = null;
     }
 
     // ─── Méthodes internes ───
 
-    /** Charge l'objet racine depuis le localStorage (avec cache) */
+    /** Charge l'objet racine depuis le localStorage */
     _load() {
-        if (this._cache !== null) return this._cache;
         try {
             const raw = localStorage.getItem(this.appKey);
-            this._cache = raw ? JSON.parse(raw) : {};
+            return raw ? JSON.parse(raw) : null;
         } catch (e) {
-            console.warn(`[CommonStorage:${this.appKey}] Erreur de lecture:`, e);
-            this._cache = {};
+            console.error(`[CommonStorage:${this.appKey}] Erreur de lecture:`, e);
+            return null;
         }
-        return this._cache;
     }
 
-    /** Persiste le cache en localStorage */
-    _save() {
+    /** Persiste l'objet racine en localStorage */
+    _save(data) {
         try {
-            localStorage.setItem(this.appKey, JSON.stringify(this._cache));
+            localStorage.setItem(this.appKey, JSON.stringify(data));
         } catch (e) {
             console.error(`[CommonStorage:${this.appKey}] Erreur d'écriture:`, e);
         }
@@ -58,7 +55,8 @@ class CommonStorage {
      */
     get(key, defaultValue = null) {
         const data = this._load();
-        return key in data ? data[key] : defaultValue;
+        //return key in data ? data[key] : defaultValue;
+        return data && key in data ? data[key] : defaultValue;
     }
 
     /**
@@ -67,9 +65,9 @@ class CommonStorage {
      * @param {*} value
      */
     set(key, value) {
-        this._load();
-        this._cache[key] = value;
-        this._save();
+        const data = this._load();
+        data[key] = value;
+        this._save(data);
     }
 
     /**
@@ -77,9 +75,9 @@ class CommonStorage {
      * @param {string} key
      */
     remove(key) {
-        this._load();
-        delete this._cache[key];
-        this._save();
+        const data = this._load();
+        delete data[key];
+        this._save(data);
     }
 
     /**
@@ -95,31 +93,27 @@ class CommonStorage {
      * @param {Object} data
      */
     setAll(data) {
-        this._cache = data && typeof data === 'object' ? data : {};
-        this._save();
+        const safeData = data && typeof data === 'object' ? data : {};
+        this._save(safeData);
     }
 
     /**
      * Vérifie si l'app a des données
      * @returns {boolean}
      */
-    hasData() {
-        return Object.keys(this._load()).length > 0;
+    isEmpty() {
+        try {
+            return Object.keys(this._load() || {}).length === 0;
+        } catch (e) {
+            return true;
+        }
     }
 
     /**
      * Supprimer toutes les données de cette app
      */
     clear() {
-        this._cache = {};
         localStorage.removeItem(this.appKey);
-    }
-
-    /**
-     * Invalider le cache (force une relecture depuis localStorage)
-     */
-    invalidateCache() {
-        this._cache = null;
     }
 }
 

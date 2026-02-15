@@ -6,10 +6,10 @@
  *
  * Usage :
  *   const storage = new CommonStorage('velib');  // 'velib' est chargé dans l'ojbet racine
- *   storage.set('stations', [...]);              // stocke les stations dans la clé 'stations' de l'objet racine dans 'velib'
- *   storage.get('stations');                     // récupère les stations depuis la clé 'stations' de l'objet racine dans 'velib'
- *   storage.getAll();                            // récupère l'objet racine complet { stations: [...] }
- *   storage.setAll({ stations: [...] });         // remplace l'objet racine complet par { stations: [...] }
+ *   storage.setItem('stations', [...]);              // stocke les stations dans la clé 'stations' de l'objet racine dans 'velib'
+ *   storage.getItem('stations');                     // récupère les stations depuis la clé 'stations' de l'objet racine dans 'velib'
+ *   storage.getAllItems();                            // récupère l'objet racine complet { stations: [...] }
+ *   storage.setAllItems({ stations: [...] });         // remplace l'objet racine complet par { stations: [...] }
  *   storage.clear();                             // supprime toutes les données de cette app
  */
 class CommonStorage {
@@ -53,7 +53,7 @@ class CommonStorage {
      * @param {*} defaultValue - Valeur par défaut si la clé n'existe pas
      * @returns {*}
      */
-    get(key, defaultValue = null) {
+    getItem(key, defaultValue = null) {
         const data = this._load();
         //return key in data ? data[key] : defaultValue;
         return data && key in data ? data[key] : defaultValue;
@@ -64,7 +64,7 @@ class CommonStorage {
      * @param {string} key
      * @param {*} value
      */
-    set(key, value) {
+    setItem(key, value) {
         const data = this._load();
         data[key] = value;
         this._save(data);
@@ -84,7 +84,7 @@ class CommonStorage {
      * Récupérer l'objet racine complet
      * @returns {Object}
      */
-    getAll() {
+    getAllItems() {
         return this._load();
     }
 
@@ -92,7 +92,7 @@ class CommonStorage {
      * Remplacer l'objet racine complet
      * @param {Object} data
      */
-    setAll(data) {
+    setAllItems(data) {
         const safeData = data && typeof data === 'object' ? data : {};
         this._save(safeData);
     }

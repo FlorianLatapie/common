@@ -9,10 +9,10 @@
  *
  * Usage:
  *   const storage = new LocalStorageWrapper('my-app'); // 'my-app' is loaded under the root key
- *   storage.setItem('my-obj-key', [...]);        // stores a JSON object with its key under 'my-obj-key' in the root key 'my-app'
- *   storage.getItem('my-obj-key');               // reads a JSON object from 'my-obj-key' in the root key 'my-app'
- *   storage.removeItem('my-obj-key');            // removes 'my-obj-key' and its associated value from the root key'my-app'
- *   storage.clear();                             // removes all data for this app
+ *   storage.setItem('my-obj-key', [...]);              // stores a JSON object with its key under 'my-obj-key' in the root key 'my-app'
+ *   storage.getItem('my-obj-key');                     // reads a JSON object from 'my-obj-key' in the root key 'my-app'
+ *   storage.removeItem('my-obj-key');                  // removes 'my-obj-key' and its associated value from the root key'my-app'
+ *   storage.clear();                                   // removes all data for this app
  */
 
 class LocalStorageWrapper {
@@ -142,5 +142,3 @@ class LocalStorageWrapper {
         return JSON.stringify(this._load() || {});
     }
 }
-
-window.LocalStorageWrapper = LocalStorageWrapper;

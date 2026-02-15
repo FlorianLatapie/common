@@ -1,5 +1,5 @@
 /**
- * CommonStorage - localStorage wrapper for web apps on florianlatapie.github.io
+ * LocalStorageWrapper - localStorage wrapper for web apps on florianlatapie.github.io
  *
  * Each application uses a unique root key in localStorage.
  * All app data is stored as a JSON object under that root key.
@@ -8,20 +8,20 @@
  * and provide an API as close as possible to localStorage.
  *
  * Usage:
- *   const storage = new CommonStorage('my-app'); // 'my-app' is loaded under the root key
+ *   const storage = new LocalStorageWrapper('my-app'); // 'my-app' is loaded under the root key
  *   storage.setItem('my-obj-key', [...]);        // stores a JSON object with its key under 'my-obj-key' in the root key 'my-app'
  *   storage.getItem('my-obj-key');               // reads a JSON object from 'my-obj-key' in the root key 'my-app'
  *   storage.removeItem('my-obj-key');            // removes 'my-obj-key' and its associated value from the root key'my-app'
  *   storage.clear();                             // removes all data for this app
  */
 
-class CommonStorage {
+class LocalStorageWrapper {
     /**
      * @param {string} appKey - Clé racine unique de l'application dans le localStorage
      */
     constructor(appKey) {
         if (!appKey || typeof appKey !== 'string') {
-            throw new Error('CommonStorage: appKey est requis');
+            throw new Error('LocalStorageWrapper: appKey est requis');
         }
         this.appKey = appKey;
     }
@@ -40,7 +40,7 @@ class CommonStorage {
             const parsed = JSON.parse(raw);
             return this._isPlainObject(parsed) ? parsed : null;
         } catch (e) {
-            console.error(`[CommonStorage:${this.appKey}] Erreur de lecture:`, e);
+            console.error(`[LocalStorageWrapper:${this.appKey}] Erreur de lecture:`, e);
             return null;
         }
     }
@@ -50,7 +50,7 @@ class CommonStorage {
         try {
             localStorage.setItem(this.appKey, JSON.stringify(data));
         } catch (e) {
-            console.error(`[CommonStorage:${this.appKey}] Erreur d'écriture:`, e);
+            console.error(`[LocalStorageWrapper:${this.appKey}] Erreur d'écriture:`, e);
         }
     }
 
@@ -77,7 +77,7 @@ class CommonStorage {
      */
     setItem(key, value) {
         if (typeof key !== 'string' || key.length === 0) {
-            throw new Error('CommonStorage: key est requis');
+            throw new Error('LocalStorageWrapper: key est requis');
         }
         const data = this._load() || {};
         data[key] = value;
@@ -90,7 +90,7 @@ class CommonStorage {
      */
     removeItem(key) {
         if (typeof key !== 'string' || key.length === 0) {
-            throw new Error('CommonStorage: key est requis');
+            throw new Error('LocalStorageWrapper: key est requis');
         }
         const data = this._load();
         if (!data || !Object.prototype.hasOwnProperty.call(data, key)) return;
@@ -99,7 +99,7 @@ class CommonStorage {
     }
 
     /**
-     * Check whether the CommonStorage object has any data
+     * Check whether the LocalStorageWrapper object has any data
      * @returns {boolean}
      */
     isEmpty() {
@@ -111,7 +111,7 @@ class CommonStorage {
     }
 
     /**
-     * Remove all data for CommonStorage object
+     * Remove all data for LocalStorageWrapper object
      */
     clear() {
         localStorage.removeItem(this.appKey);
@@ -143,4 +143,4 @@ class CommonStorage {
     }
 }
 
-window.CommonStorage = CommonStorage;
+window.LocalStorageWrapper = LocalStorageWrapper;

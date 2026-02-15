@@ -3,15 +3,17 @@
  *
  * Chaque application utilise une clé racine unique dans le localStorage.
  * Toutes les données de l'app sont stockées comme un objet JSON sous cette clé.
+ * 
+ * Objectif : être un wrapper autour de localStorage pour simplifier la gestion des données d'une app, éviter les conflits entre apps, et fournir une API la plus proche possible de localStorage pour faciliter la transition.
  *
  * Usage :
- *   const storage = new CommonStorage('velib');  // 'velib' est chargé dans l'ojbet racine
- *   storage.setItem('stations', [...]);              // stocke les stations dans la clé 'stations' de l'objet racine dans 'velib'
- *   storage.getItem('stations');                     // récupère les stations depuis la clé 'stations' de l'objet racine dans 'velib'
- *   storage.getAllItems();                            // récupère l'objet racine complet { stations: [...] }
- *   storage.setAllItems({ stations: [...] });         // remplace l'objet racine complet par { stations: [...] }
- *   storage.clear();                             // supprime toutes les données de cette app
+ *   const storage = new CommonStorage('velib'); // 'velib' est chargé dans l'ojbet racine
+ *   storage.setItem('stations', [...]);         // stocke les stations dans la clé 'stations' de l'objet racine dans 'velib'
+ *   storage.getItem('stations');                // récupère les stations depuis la clé 'stations' de l'objet racine dans 'velib'
+ *   storage.removeItem('stations');             // supprime la clé 'stations' de l'objet racine dans 'velib'
+ *   storage.clear();                            // supprime toutes les données de cette app
  */
+
 class CommonStorage {
     /**
      * @param {string} appKey - Clé racine unique de l'application dans le localStorage
@@ -25,11 +27,17 @@ class CommonStorage {
 
     // ─── Méthodes internes ───
 
+    _isPlainObject(value) {
+        return !!value && typeof value === 'object' && !Array.isArray(value);
+    }
+
     /** Charge l'objet racine depuis le localStorage */
     _load() {
         try {
             const raw = localStorage.getItem(this.appKey);
-            return raw ? JSON.parse(raw) : null;
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return this._isPlainObject(parsed) ? parsed : null;
         } catch (e) {
             console.error(`[CommonStorage:${this.appKey}] Erreur de lecture:`, e);
             return null;
@@ -54,9 +62,11 @@ class CommonStorage {
      * @returns {*}
      */
     getItem(key, defaultValue = null) {
+        if (typeof key !== 'string' || key.length === 0) return defaultValue;
         const data = this._load();
-        //return key in data ? data[key] : defaultValue;
-        return data && key in data ? data[key] : defaultValue;
+        return data && Object.prototype.hasOwnProperty.call(data, key)
+            ? data[key]
+            : defaultValue;
     }
 
     /**
@@ -65,7 +75,10 @@ class CommonStorage {
      * @param {*} value
      */
     setItem(key, value) {
-        const data = this._load();
+        if (typeof key !== 'string' || key.length === 0) {
+            throw new Error('CommonStorage: key est requis');
+        }
+        const data = this._load() || {};
         data[key] = value;
         this._save(data);
     }
@@ -74,27 +87,14 @@ class CommonStorage {
      * Supprimer une clé de l'objet racine
      * @param {string} key
      */
-    remove(key) {
+    removeItem(key) {
+        if (typeof key !== 'string' || key.length === 0) {
+            throw new Error('CommonStorage: key est requis');
+        }
         const data = this._load();
+        if (!data || !Object.prototype.hasOwnProperty.call(data, key)) return;
         delete data[key];
         this._save(data);
-    }
-
-    /**
-     * Récupérer l'objet racine complet
-     * @returns {Object}
-     */
-    getAllItems() {
-        return this._load();
-    }
-
-    /**
-     * Remplacer l'objet racine complet
-     * @param {Object} data
-     */
-    setAllItems(data) {
-        const safeData = data && typeof data === 'object' ? data : {};
-        this._save(safeData);
     }
 
     /**
@@ -114,6 +114,30 @@ class CommonStorage {
      */
     clear() {
         localStorage.removeItem(this.appKey);
+    }
+
+    // ─── API native ───
+
+    /**
+     * Alias pour accéder directement aux donnees
+     * @returns {Object}
+     */
+    get data() {
+        return this._load() || {};
+    }
+
+    /**
+     * Permet JSON.stringify(storage) d'afficher les donnees
+     */
+    toJSON() {
+        return this._load() || {};
+    }
+
+    /**
+     * Permet String(storage) ou `${storage}` d'afficher les donnees
+     */
+    [Symbol.toPrimitive]() {
+        return JSON.stringify(this._load() || {});
     }
 }
 

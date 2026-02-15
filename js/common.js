@@ -12,6 +12,7 @@
  *   storage.setItem('my-obj-key', [...]);              // stores a JSON object with its key under 'my-obj-key' in the root key 'my-app'
  *   storage.getItem('my-obj-key');                     // reads a JSON object from 'my-obj-key' in the root key 'my-app'
  *   storage.removeItem('my-obj-key');                  // removes 'my-obj-key' and its associated value from the root key'my-app'
+ *   storage.hasItem('my-obj-key');                     // checks if 'my-obj-key' exists
  *   storage.clear();                                   // removes all data for this app
  */
 
@@ -108,6 +109,25 @@ class LocalStorageWrapper {
         } catch (e) {
             return true;
         }
+    }
+
+    /**
+     * Get the number of items in the storage
+     * @returns {number}
+     */
+    get length() {
+        return Object.keys(this._load() || {}).length;
+    }
+
+    /**
+     * Check if a key exists in the storage
+     * @param {string} key
+     * @returns {boolean}
+     */
+    hasItem(key) {
+        if (typeof key !== 'string' || key.length === 0) return false;
+        const data = this._load();
+        return data ? Object.prototype.hasOwnProperty.call(data, key) : false;
     }
 
     /**
